@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import './App.css'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import loginService from './services/login'
 import blogService from './services/blogs'
 
 const App = () => {
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [notificationMessage, setNotificationMessage] = useState(null)
   const [blogs, setBlogs] = useState([])
   const [username, setUserName] = useState('')
   const [password, setPassword] = useState('')
@@ -43,9 +45,9 @@ const App = () => {
     } 
     catch (exception) {
       setPassword('')
-      setErrorMessage('Wrong credentials')
+      setNotificationMessage({type: 'error', text: 'Wrong username and password'})
       setTimeout(() => {
-        setErrorMessage(null)
+        setNotificationMessage(null)
       }, 5000);
     }
   }
@@ -78,13 +80,21 @@ const App = () => {
 
   const handleCreateBlog = async (event) => {
     event.preventDefault()
-    const newBlog = {title, author, url}
-    const savedBlog = await blogService.createBlog(newBlog)
-    console.log(savedBlog)
-    setBlogs(blogs.concat(savedBlog))
-    setTitle('')
-    setAuthor('')
-    setUrl('')
+    try
+    {
+      const newBlog = {title, author, url}
+      const savedBlog = await blogService.createBlog(newBlog)
+      setNotificationMessage({type: 'success', text: `a new blog ${title} by ${author} added`})
+      setBlogs(blogs.concat(savedBlog))
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+      setTimeout(() => setNotificationMessage(null),5000)
+    }
+    catch{
+      setNotificationMessage({type: 'error', text: 'Unable to add this Blog. Please retry'})
+      setTimeout(() => setNotificationMessage(null), 5000)
+    }
   }
 
   const createBlogSection = 
@@ -126,7 +136,7 @@ const App = () => {
 
   return (
     <div>
-      <p style={{color:'red'}}><strong>{errorMessage}</strong></p>
+      <Notification message={notificationMessage}/>
       <h2>blogs</h2>
       {user === null && loginSection}
       {user !== null &&  userInfo()}
