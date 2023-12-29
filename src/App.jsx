@@ -62,6 +62,7 @@ const App = () => {
       const savedBlog = await blogService.createBlog(newBlog)
       blogFormRef.current.handleToggleVisibility()
       setNotificationMessage({type: 'success', text: `a new blog ${savedBlog.title} by ${savedBlog.author} added`})
+      savedBlog.user={username: user['username'], name: user['name']}
       setBlogs(blogs.concat(savedBlog))
       setTimeout(() => setNotificationMessage(null),5000)
     }
