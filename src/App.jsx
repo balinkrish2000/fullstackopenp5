@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
+import Togglable from './components/Togglable'
+import LoginForm from './components/LoginForm'
+import CreateBlog from './components/CreateBlog'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import loginService from './services/login'
@@ -8,13 +11,9 @@ import blogService from './services/blogs'
 const App = () => {
   const [notificationMessage, setNotificationMessage] = useState(null)
   const [blogs, setBlogs] = useState([])
-  const [username, setUserName] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
 
+  const blogFormRef = useRef()
 
   useEffect(() => {
     if(user) {
@@ -33,18 +32,14 @@ const App = () => {
     }
   }, [])
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
+  const handleLogin = async (username, password) => {
     try {
       const user = await loginService.login({username, password})
       blogService.setToken(user.token)
       window.localStorage.setItem('loggedInUser', JSON.stringify(user))
       setUser(user)
-      setUserName('')
-      setPassword('')
     } 
     catch (exception) {
-      setPassword('')
       setNotificationMessage({type: 'error', text: 'Wrong username and password'})
       setTimeout(() => {
         setNotificationMessage(null)
@@ -57,38 +52,17 @@ const App = () => {
     setUser(null)
   }
 
-  const loginSection = 
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-          <input
-            type='text'
-            value={username}
-            name='Username'
-            onChange={({target}) => setUserName(target.value)}/>
-      </div>
-      <div>
-        password
-          <input
-            type='password'
-            value={password}
-            name='Password'
-            onChange={({target}) => setPassword(target.value)}/>
-      </div>
-      <button type="submit">Login</button>
-    </form>
+  const loginSection = <Togglable buttonText='Login Form'>
+      <LoginForm userLogin={handleLogin}/>
+    </Togglable>
 
-  const handleCreateBlog = async (event) => {
-    event.preventDefault()
+  const handleCreateBlog = async (newBlog) => {
     try
     {
-      const newBlog = {title, author, url}
       const savedBlog = await blogService.createBlog(newBlog)
-      setNotificationMessage({type: 'success', text: `a new blog ${title} by ${author} added`})
+      blogFormRef.current.handleToggleVisibility()
+      setNotificationMessage({type: 'success', text: `a new blog ${savedBlog.title} by ${savedBlog.author} added`})
       setBlogs(blogs.concat(savedBlog))
-      setTitle('')
-      setAuthor('')
-      setUrl('')
       setTimeout(() => setNotificationMessage(null),5000)
     }
     catch{
@@ -97,38 +71,9 @@ const App = () => {
     }
   }
 
-  const createBlogSection = 
-    <form onSubmit={handleCreateBlog}>
-      <h2>Create New</h2>
-      <div>
-        title:
-        <input
-          type='text'
-          value={title}
-          name='Title'
-          onChange={({target}) => setTitle(target.value)}
-        />
-      </div>
-      <div>
-        author:
-        <input
-          type='text'
-          value={author}
-          name='Author'
-          onChange={({target}) => setAuthor(target.value)}
-        />
-      </div>
-      <div>
-        url:
-        <input
-          type='text'
-          value={url}
-          name='Url'
-          onChange={({target}) => setUrl(target.value)}
-        />
-      </div>
-      <button type='submit'>create</button>
-    </form>
+  const createBlogSection = <Togglable buttonText='Add Blog Form' ref={blogFormRef}>
+      <CreateBlog addNewBlog={handleCreateBlog}/>
+    </Togglable>
 
   const userInfo = () => (user['name'] + ' logged in ')
   const logoutButton = <button type='submit' onClick={handleLogout}>logout</button>
