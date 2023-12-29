@@ -1,6 +1,6 @@
 import Togglable from "./Togglable"
 
-const Blog = ({ blog, blogLikeUpdate }) => {
+const Blog = ({ blog, blogLikeUpdate, removeBlog }) => {
 
   const blogStyle={
     paddingTop: 10,
@@ -17,6 +17,11 @@ const Blog = ({ blog, blogLikeUpdate }) => {
     blogLikeUpdate(newBlogToUpdate)
   }
 
+  const handleRemoveBlog = () => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`))
+      removeBlog(blog.id)
+  }
+
   return (
       <div style={blogStyle}>
         {blog.title}
@@ -24,7 +29,8 @@ const Blog = ({ blog, blogLikeUpdate }) => {
           {blog.author}<br/>
           {blog.url}<br/>
           {blog.likes}<button onClick={handleOnLike}>like</button><br/>
-          {blog.user.username}
+          {blog.user.username}<br/>
+          <button onClick={handleRemoveBlog}>remove</button>
         </Togglable>
       </div>
     )

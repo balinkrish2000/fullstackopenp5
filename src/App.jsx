@@ -91,9 +91,25 @@ const App = () => {
     }
   }
 
+  const handleRemoveBlog = async (blogId) => {
+    try {
+      const updatedBlog = await blogService.deleteBlog(blogId)
+      let updatedBlogList = blogs.filter(blog => blog.id !== blogId).sort((a,b) => b.likes - a.likes)
+      setBlogs(updatedBlogList)
+    }
+    catch (e) {
+      setNotificationMessage({type: 'error', text: e.response.data.error})
+      setTimeout(() => setNotificationMessage(null), 5000)
+    }
+  }
+
   const userInfo = () => (user['name'] + ' logged in ')
   const logoutButton = <button type='submit' onClick={handleLogout}>logout</button>
-  const blogsSection = blogs.map(blog => <Blog key={blog.id} blog={blog} blogLikeUpdate={handleBlogLikeUpdate} />)
+  const blogsSection = blogs.map(blog => 
+                  <Blog key={blog.id} 
+                        blog={blog} 
+                        blogLikeUpdate={handleBlogLikeUpdate} 
+                        removeBlog={handleRemoveBlog}/>)
 
   return (
     <div>
