@@ -19,10 +19,10 @@ const Togglable = (props,refs) => {
 
     return (
         <>
-             <div style={visibilityStyle}>
+            <button onClick={handleToggleVisibility}>{buttonText}</button>
+            <div style={visibilityStyle}>
                 {props.children}
             </div>
-            <button onClick={handleToggleVisibility}>{buttonText}</button>
         </>
     )
 }
