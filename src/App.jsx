@@ -18,7 +18,7 @@ const App = () => {
   useEffect(() => {
     if(user) {
       blogService.getAll(user).then(blogs =>
-        setBlogs( blogs )
+        setBlogs( blogs.sort((a,b) => b.likes - a.likes) )
       )
     }  
   }, [user])
@@ -76,9 +76,24 @@ const App = () => {
       <CreateBlog addNewBlog={handleCreateBlog}/>
     </Togglable>
 
+  const handleBlogLikeUpdate = async (blogToUpdate) => {
+    try {
+      const updatedBlog = await blogService.updateBlog(blogToUpdate)
+      updatedBlog.user={username: user['username'], name: user['name']}
+      let updatedBlogList = blogs.map(blog => blog.id === updatedBlog.id? updatedBlog : blog).sort((a,b) => b.likes - a.likes)
+      setBlogs(updatedBlogList)
+      setNotificationMessage({type: 'success', text: `likes updated in blog ${updatedBlog.title}`})
+      setTimeout(() => setNotificationMessage(null), 5000)
+    }
+    catch (e) {
+      setNotificationMessage({type: 'error', text: e.response.data.error})
+      setTimeout(() => setNotificationMessage(null), 5000)
+    }
+  }
+
   const userInfo = () => (user['name'] + ' logged in ')
   const logoutButton = <button type='submit' onClick={handleLogout}>logout</button>
-  const blogsSection = blogs.map(blog => <Blog key={blog.id} blog={blog} />)
+  const blogsSection = blogs.map(blog => <Blog key={blog.id} blog={blog} blogLikeUpdate={handleBlogLikeUpdate} />)
 
   return (
     <div>
