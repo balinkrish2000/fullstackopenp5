@@ -7,7 +7,7 @@ const setToken = newToken => {
   token = `Bearer ${newToken}`
 }
 
-const getAll = async (user) => {
+const getAll = async () => {
   const config = {
     headers: { Authorization: token }
   }
